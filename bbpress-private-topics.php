@@ -20,14 +20,34 @@ add_action('pre_get_posts', 'wps_private_topics');
  */
 function wps_private_topics( $query ) {
 
-	// Check if we are trying to retireve topics and that user is not an admin
+	global $post;
 
-	if (isset($query->query['post_type']) && $query->query['post_type'] == 'topic' && !current_user_can('manage_options')) {
+	// Check if displaying Single Task form
 
-		// Add parameter for dislaying posts only created by the current user
+	if (isset($post->ID) && $post->ID == 134) {
 
-		$query->set( 'author__in', array(get_current_user_id()));
-		return;
+		// Check if we are trying to retireve topics and that user is not an admin
+
+		if (isset($query->query['post_type']) && $query->query['post_type'] == 'topic' && !current_user_can('manage_options')) {
+
+			// Add parameter for dislaying posts only created by the current user
+
+			$query->set( 'author__in', array(get_current_user_id()));
+			return;
+		}
+	}
+
+	else {
+
+		// Check if we are trying to retireve topics and that user is not an admin
+
+		if (isset($query->query['post_type']) && ($query->query['post_type'] == 'topic' || $query->query['post_type'] == 'forum') && !current_user_can('manage_options')) {
+
+			// Add parameter for dislaying posts only created by the current user
+
+			$query->set( 'author__in', array(get_current_user_id()));
+			return;
+		}
 	}
 }
 
@@ -106,8 +126,6 @@ function wps_check_single_topic_count( $forum_id ) {
 			'posts_per_page' 	=> -1
 		) );
 
-		error_log(count($orders));
-
 		global $wpdb;
 
 		$order_quantity = 0;
@@ -133,8 +151,6 @@ function wps_check_single_topic_count( $forum_id ) {
 			$order_quantity += $quantity[0]->meta_value;
 
 		}
-
-		error_log($order_quantity);
 
 		// If there is a topic in progress then thrown an error
 
