@@ -9,6 +9,30 @@ Author URI: http://www.wpsite.net
 License: GPL2
 */
 
+/**
+ * Global Definitions
+ */
+
+// Single Task Groups ID
+
+if (!defined('SINGLE_TASK_GROUP_ID'))
+    define('SINGLE_TASK_GROUP_ID', 4);
+
+// Single Task Forum ID
+
+if (!defined('SINGLE_TASK_FORUM_ID'))
+    define('SINGLE_TASK_FORUM_ID', 19);
+
+// Gold Membership Product ID
+
+if (!defined('GOLD_MEMBERSHIP_PRODUCT_ID'))
+    define('GOLD_MEMBERSHIP_PRODUCT_ID', 8);
+
+// Silver Membership Product ID
+
+if (!defined('SILVER_MEMBERSHIP_PRODUCT_ID'))
+    define('SILVER_MEMBERSHIP_PRODUCT_ID', 9);
+
 add_action('pre_get_posts', 'wps_private_topics');
 
 /**
@@ -20,15 +44,37 @@ add_action('pre_get_posts', 'wps_private_topics');
  */
 function wps_private_topics( $query ) {
 
-	global $post;
+	// If user is admin then just return null because they can see all topics and fourms
+
+	if (current_user_can('manage_options')) {
+		return;
+	}
+
+	// Check if user has a single task membership
+
+	global $wpdb;
+
+	$groups = $wpdb->get_results(
+		$wpdb->prepare('SELECT * FROM `' . $wpdb->prefix . 'groups_user_group` WHERE `user_id` = %d',
+			get_current_user_id()
+		)
+	);
+
+	$single_task = false;
+
+	foreach ($groups as $group) {
+		if ($group->group_id == SINGLE_TASK_GROUP_ID) {
+			$single_task = true;
+		}
+	}
 
 	// Check if displaying Single Task form
 
-	if (isset($post->ID) && $post->ID == 134) {
+	if ($single_task) {
 
 		// Check if we are trying to retireve topics and that user is not an admin
 
-		if (isset($query->query['post_type']) && $query->query['post_type'] == 'topic' && !current_user_can('manage_options')) {
+		if (isset($query->query['post_type']) && $query->query['post_type'] == 'topic') {
 
 			// Add parameter for dislaying posts only created by the current user
 
@@ -41,7 +87,7 @@ function wps_private_topics( $query ) {
 
 		// Check if we are trying to retireve topics and that user is not an admin
 
-		if (isset($query->query['post_type']) && ($query->query['post_type'] == 'topic' || $query->query['post_type'] == 'forum') && !current_user_can('manage_options')) {
+		if (isset($query->query['post_type']) && ($query->query['post_type'] == 'topic' || $query->query['post_type'] == 'forum')) {
 
 			// Add parameter for dislaying posts only created by the current user
 
@@ -67,7 +113,7 @@ function wps_check_topics_in_progress( $forum_id ) {
 
 	$user_id = get_current_user_id();
 
-	if ( !current_user_can('manage_options') && $user_id && $forum_id != 19) {
+	if ( !current_user_can('manage_options') && $user_id && $forum_id != SINGLE_TASK_FORUM_ID) {
 
 		// Get all topics that are in progress
 
@@ -108,7 +154,7 @@ function wps_check_single_topic_count( $forum_id ) {
 
 	$user_id = get_current_user_id();
 
-	if ( $user_id && $forum_id == 19 ) {
+	if ( $user_id && $forum_id == SINGLE_TASK_FORUM_ID ) {
 
 		// Get all topics that are in progress
 
@@ -190,7 +236,7 @@ function wps_add_forum( $item_id, $values, $cart_item_key ) {
 
 	// Gold Membership
 
-	if ($values['data']->post->ID == 8) {
+	if ($values['data']->post->ID == GOLD_MEMBERSHIP_PRODUCT_ID) {
 
 		// Create a new topic from the domain name
 
@@ -202,7 +248,7 @@ function wps_add_forum( $item_id, $values, $cart_item_key ) {
 
 	// Silver Membership
 
-	else if ($values['data']->post->ID == 9) {
+	else if ($values['data']->post->ID == SILVER_MEMBERSHIP_PRODUCT_ID) {
 
 		// Create a new topic from the domain name
 
