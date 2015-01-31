@@ -242,7 +242,7 @@ function wps_add_forum( $item_id, $values, $cart_item_key ) {
 
 		$topic_id = bbp_insert_forum( $topic_data );
 
-		update_post_meta($topic_id, 'groups-groups_read_post', 'gold membership');
+		//update_post_meta($topic_id, 'groups-groups_read_post', 'gold membership');
 
 	}
 
@@ -254,7 +254,7 @@ function wps_add_forum( $item_id, $values, $cart_item_key ) {
 
 		$topic_id = bbp_insert_forum( $topic_data );
 
-		update_post_meta($topic_id, 'groups-groups_read_post', 'silver membership');
+		//update_post_meta($topic_id, 'groups-groups_read_post', 'silver membership');
 
 	}
 
